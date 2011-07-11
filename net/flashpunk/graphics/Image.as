@@ -3,6 +3,7 @@ package net.flashpunk.graphics
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
+	import flash.display.Sprite;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
@@ -20,7 +21,7 @@ package net.flashpunk.graphics
 		public var angle:Number = 0;
 		
 		/**
-		 * Scale of the image, effects both x and y scale.
+		 * Scale of the image, affects both x and y scale.
 		 */
 		public var scale:Number = 1;
 		
@@ -99,6 +100,13 @@ package net.flashpunk.graphics
 			_bitmap.bitmapData = _buffer;
 		}
 		
+		/** Update the DrawMask image, if we have one. */
+		override public function update():void {
+			if (_drawMask !== null && _drawMask.active) {
+				_drawMask.update();
+			}
+		}
+		
 		/** @private Renders the image. */
 		override public function render(target:BitmapData, point:Point, camera:Point):void
 		{
@@ -112,7 +120,12 @@ package net.flashpunk.graphics
 			// render without transformation
 			if (angle == 0 && scaleX * scale == 1 && scaleY * scale == 1 && !blend)
 			{
-				target.copyPixels(_buffer, _bufferRect, _point, null, null, true);
+				if (_drawMask == null) {
+					target.copyPixels(_buffer, _bufferRect, _point, null, null, true);
+				}
+				else {
+					target.copyPixels(_buffer, _bufferRect, _point, _drawMaskBmp.bitmapData, FP.zero, true);
+				}
 				return;
 			}
 			
@@ -126,7 +139,15 @@ package net.flashpunk.graphics
 			_matrix.tx += originX + _point.x;
 			_matrix.ty += originY + _point.y;
 			_bitmap.smoothing = smooth;
-			target.draw(_bitmap, _matrix, null, blend, null, smooth);
+			
+			if (_drawMaskBmp != null) {
+				target.draw(_drawMaskSprite, _matrix, null, blend, null, smooth);
+			}
+			else {
+				target.draw(_bitmap, _matrix, null, blend, null, smooth);
+			}
+			
+			
 		}
 		
 		/**
@@ -257,24 +278,6 @@ package net.flashpunk.graphics
 				}
 			}
 			_tint = _colorTransform;
-			/*
-			if (_tintMode == TINTING_MULTIPLY) {
-				_tint.redMultiplier   = _tintFactor * (Number(_color >> 16 & 0xFF) / 255 - 1) + 1;
-				_tint.greenMultiplier = _tintFactor * (Number(_color >> 8 & 0xFF) / 255 - 1) + 1;
-				_tint.blueMultiplier  = _tintFactor * (Number(_color & 0xFF) / 255 - 1) + 1;
-				_tint.redOffset       = 0;
-				_tint.greenOffset     = 0;
-				_tint.blueOffset      = 0;
-			}
-			else {
-				_tint.redMultiplier   = 1.0 - _tintFactor;
-				_tint.greenMultiplier = 1.0 - _tintFactor;
-				_tint.blueMultiplier  = 1.0 - _tintFactor;
-				_tint.redOffset       = (_color >> 16 & 0xFF) * _tintFactor;
-				_tint.greenOffset     = (_color >> 8 & 0xFF) * _tintFactor;
-				_tint.blueOffset      = (_color & 0xFF) * _tintFactor;
-			}
-			*/
 			
 			_tint.redMultiplier   = _tintMode * (1.0 - _tintFactor) + (1-_tintMode) * (_tintFactor * (Number(_color >> 16 & 0xFF) / 255 - 1) + 1);
 			_tint.greenMultiplier = _tintMode * (1.0 - _tintFactor) + (1-_tintMode) * (_tintFactor * (Number(_color >> 8 & 0xFF) / 255 - 1) + 1);
@@ -390,6 +393,68 @@ package net.flashpunk.graphics
 		 */
 		public function get locked():Boolean { return _locked; }
 		
+		/**
+		 * Assigns another `Image` instance to be this one's drawing mask.
+		 */
+		public function set drawMask(img:Image):void {
+			// Do nothing if it's the same mask
+			if (img == _drawMask) {
+				return;
+			}
+			
+			if (_drawMask != null) {
+				_drawMaskSprite.removeChild(_bitmap);
+				_drawMaskSprite.removeChild(_drawMaskBmp);
+			}
+			
+			if (img == null) {
+				_bitmap.mask = null;
+				_drawMask = null;
+				_drawMaskBmp = null;
+			}
+			else {
+				//_bitmap.cacheAsBitmap = true;
+				_drawMask = img;
+				_drawMaskBmp = img.assignAsMask(this);
+				//_bitmap.opaqueBackground = 0xFFFF00FF;
+				
+				_drawMaskSprite.addChild(_bitmap);
+				_drawMaskSprite.addChild(_drawMaskBmp);
+				
+				_bitmap.cacheAsBitmap = true;
+				_drawMaskBmp.cacheAsBitmap = true;
+				_drawMaskSprite.cacheAsBitmap = true;
+				
+				_bitmap.mask = _drawMaskBmp;
+
+				/*
+				_bitmap.x = 0;
+				_drawMaskBmp.x = 0;
+				_drawMaskSprite.x = 0;
+				
+				_bitmap.y = 0;
+				_drawMaskBmp.y = 0;
+				_drawMaskSprite.y = 0;
+				*/
+				
+			}
+		}
+		
+		/**
+		 * Return the drawing mask.
+		 */
+		public function get drawMask():Image {
+			return _drawMask;
+		}
+		
+		/**
+		 * Called when this image is set to be another's drawing mask
+		 */
+		public function assignAsMask(img:Image):Bitmap {
+			//_bitmap.cacheAsBitmap = true;
+			return _bitmap;
+		}
+		
 		// Locking
 		/** @private */ protected var _locked:Boolean = false;
 		/** @private */ protected var _needsClear:Boolean = false;
@@ -416,5 +481,10 @@ package net.flashpunk.graphics
 		/** @protected */ protected var _flipped:Boolean;
 		/** @protected */ protected var _flip:BitmapData;
 		/** @protected */ protected static var _flips:Object = { };
+		
+		// DrawMask information
+		/** @protected */ protected var _drawMask:Image = null;
+		/** @protected */ protected var _drawMaskBmp:Bitmap = null;
+		/** @protected */ protected var _drawMaskSprite:Sprite = new Sprite;
 	}
 }
