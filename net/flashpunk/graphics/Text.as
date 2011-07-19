@@ -137,12 +137,12 @@ package net.flashpunk.graphics
 		public function setStyle(tagName:String, params:*):void
 		{
 			var format:TextFormat;
-			
+
 			if (params is TextFormat || ! params) {
 				format = params;
 			} else {
 				format = new TextFormat;
-				
+
 				for (var key:String in params) {
 					if (format.hasOwnProperty(key)) {
 						format[key] = params[key];
@@ -151,108 +151,75 @@ package net.flashpunk.graphics
 					}
 				}
 			}
-			
+
 			_styles[tagName] = format;
-			
+
 			updateTextBuffer();
 		}
+
+		protected var _styles:Object = {};
 		
-		protected var _styles:Object = new Object;
-		private var _styleToDo:Vector.<Function> = new Vector.<Function>;
-		private var _styleIndices:Vector.<int> = new Vector.<int>;
-		private var _styleMatched:Array = new Array;
-		
-		private function _getApplyStyleFunction (format:TextFormat, start:int, end:int):Function
-		{
-			return function ():void
-			{
-				trace(start +" to " +end);
-				start = _styleIndices[start];
-				end = _styleIndices[end];
-				trace("is " + start +" to " +end);
-				
-				if (start != end) _field.setTextFormat(format, start, end);
-			}
-		}
-		
-		private function matchStyles():void
-		{
-			trace("update");
-			
+		private function matchStyles():void {
+			var fragments:Array = _text.split(/(<[^\s>]+>)/);
+
+			// Fully formatted spans, each is an array with tag format, start pos, end pos (in chars)
+			var spans:Array = [];
+			// "Open" tags for parsing - tag name and span index
+			var open:Array = [];
+			// Plain text as a string
+			var plainText:String = '';
+
 			var i:int, j:int;
-			
-			var fragments:Array = _text.split("<");
-			
-			_styleToDo.length = 0;
-			_styleIndices.length = 0;
-			_styleMatched.length = 0;
-			
-			trace(fragments);
-			
-			for (i = 1; i < fragments.length; i++) {
-				if (_styleMatched[i]) continue;
-				
-				var substring:String = fragments[i];
-			
-				var tagLength:int = substring.indexOf(">");
-				
-				if (tagLength > 0) {
-					var tagName:String = substring.substr(0, tagLength);
-					trace("testing "+tagName + " at " + i);
-					if (_styles[tagName]) {
-						fragments[i] = substring.slice(tagLength + 1);
-				
-						var endTagString:String = "/" + tagName + ">";
-				
-						for (j = i + 1; j < fragments.length; j++) {
-							if (fragments[j].substr(0, tagLength + 2) == endTagString) {
-								fragments[j] = fragments[j].slice(tagLength + 2);
-								_styleMatched[j] = true;
-							
+			var tagName:String;
+
+			for (i = 0; i < fragments.length; i++) {
+				if (fragments[i].charAt(0) == '<') {
+					if (fragments[i].charAt(1) == '/') {
+						// Closing tag
+						tagName = fragments[i].substr(2, fragments[i].length - 3);
+						// Find the opening tag
+						for (j = open.length-1; j >= 0; j--) {
+							if (open[j][0] == tagName) {
+								// Update span with correct end position
+								spans[open[j][1]][2] = plainText.length;
+								// Remove from "open" array
+								open.splice(j, 1);
 								break;
 							}
 						}
-						
-						trace(tagName + " found from " + i + " to " + j);
-						
-						_styleToDo.push(_getApplyStyleFunction(_styles[tagName], i, j));
-						
-						continue;
+					}
+					else {
+						// Opening tag
+						tagName = fragments[i].substr(1, fragments[i].length - 2);
+						if (_styles[tagName]) {
+							spans.push([ _styles[tagName], plainText.length, null ]);
+							open.push([ tagName, spans.length - 1]);
+						}
 					}
 				}
-				
-				fragments[i-1] = fragments[i-1].concat("<");
+				else {
+					// Text fragment
+					plainText += fragments[i];
+				}
 			}
 			
-			_styleIndices[0] = 0;
-			j = 0;
-			
-			for (i = 0; i < fragments.length; i++) {
-				j += fragments[i].length;
-				_styleIndices[i+1] = j;
-			}
-			
-			trace(_styleIndices);
-			
-			_field.text = fragments.join("");
-			
+			// Set the plain jane text
+			_field.text = plainText;
+
+			// Default formatting
 			_field.setTextFormat(_form);
-			
-			for (i = 0; i < _styleToDo.length; i++) {
-				trace("Calling "+ i);
-				_styleToDo[i]();
+
+			for (i = 0; i < spans.length; i++) {
+				_field.setTextFormat(spans[i][0], spans[i][1], spans[i][2]);
 			}
+			
 		}
 		
 		/** Updates the text buffer, which is the source for the image buffer. */
 		public function updateTextBuffer():void
 		{
-			if (false) {
-				matchStyles();
-			} else {
-				_field.setTextFormat(_form);
-			}
-			
+			matchStyles();
+			//_field.setTextFormat(_form);
 			_field.width = _width;
 			_textWidth = _field.textWidth + 4;
 			_textHeight = _field.textHeight + 4;
@@ -283,9 +250,7 @@ package net.flashpunk.graphics
 			
 			var offsetRequired: Boolean = false;
 			
-			var i:int;
-			
-			for (i = 0; i < _field.numLines; i++) {
+			for (var i: int = 0; i < _field.numLines; i++) {
 				var tlm: TextLineMetrics = _field.getLineMetrics(i);
 				var remainder: Number = tlm.x % 1;
 				if (remainder > 0.1 && remainder < 0.9) {
