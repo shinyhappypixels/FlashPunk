@@ -1,4 +1,4 @@
-package net.flashpunk.graphics 
+﻿package net.flashpunk.graphics 
 {
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
@@ -69,8 +69,6 @@ package net.flashpunk.graphics
 		/** @private Updates the animation. */
 		override public function update():void 
 		{
-			super.update();
-			
 			if (_anim && !complete)
 			{
 				_timer += (FP.fixed ? _anim._frameRate : _anim._frameRate * FP.elapsed) * rate;

@@ -1,4 +1,4 @@
-package net.flashpunk.graphics 
+﻿package net.flashpunk.graphics 
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -32,11 +32,6 @@ package net.flashpunk.graphics
 		 * The alignment to assign to new Text objects.
 		 */
 		public static var align:String = "left";
-		
-		/**
-		 * The leading to assign to new Text objects.
-		 */
-		public static var defaultLeading:Number = 0;
 		
 		/**
 		 * The wordWrap property to assign to new Text objects.
@@ -82,7 +77,6 @@ package net.flashpunk.graphics
 			_font = Text.font;
 			_size = Text.size;
 			_align = Text.align;
-			_leading = Text.defaultLeading;
 			_wordWrap = Text.wordWrap;
 			resizable = Text.resizable;
 			var width:uint = 0;
@@ -111,7 +105,6 @@ package net.flashpunk.graphics
 			_field.wordWrap = _wordWrap;
 			_form = new TextFormat(_font, _size, 0xFFFFFF);
 			_form.align = _align;
-			_form.leading = _leading;
 			_field.defaultTextFormat = _form;
 			_field.text = _text = text;
 			_width = width || _field.textWidth + 4;
@@ -134,92 +127,10 @@ package net.flashpunk.graphics
 			}
 		}
 		
-		public function setStyle(tagName:String, params:*):void
-		{
-			var format:TextFormat;
-
-			if (params is TextFormat || ! params) {
-				format = params;
-			} else {
-				format = new TextFormat;
-
-				for (var key:String in params) {
-					if (format.hasOwnProperty(key)) {
-						format[key] = params[key];
-					} else {
-						throw new Error('"' + key + '" is not a TextFormat property');
-					}
-				}
-			}
-
-			_styles[tagName] = format;
-
-			updateTextBuffer();
-		}
-
-		protected var _styles:Object = {};
-		
-		private function matchStyles():void {
-			var fragments:Array = _text.split(/(<[^\s>]+>)/);
-
-			// Fully formatted spans, each is an array with tag format, start pos, end pos (in chars)
-			var spans:Array = [];
-			// "Open" tags for parsing - tag name and span index
-			var open:Array = [];
-			// Plain text as a string
-			var plainText:String = '';
-
-			var i:int, j:int;
-			var tagName:String;
-
-			for (i = 0; i < fragments.length; i++) {
-				if (fragments[i].charAt(0) == '<') {
-					if (fragments[i].charAt(1) == '/') {
-						// Closing tag
-						tagName = fragments[i].substr(2, fragments[i].length - 3);
-						// Find the opening tag
-						for (j = open.length-1; j >= 0; j--) {
-							if (open[j][0] == tagName) {
-								// Update span with correct end position
-								spans[open[j][1]][2] = plainText.length;
-								// Remove from "open" array
-								open.splice(j, 1);
-								break;
-							}
-						}
-					}
-					else {
-						// Opening tag
-						tagName = fragments[i].substr(1, fragments[i].length - 2);
-						if (_styles[tagName]) {
-							spans.push([ _styles[tagName], plainText.length, null ]);
-							open.push([ tagName, spans.length - 1]);
-						}
-					}
-				}
-				else {
-					// Text fragment
-					plainText += fragments[i];
-				}
-			}
-			
-			// Set the plain jane text
-			_field.text = plainText;
-
-			// Default formatting
-			_field.setTextFormat(_form);
-
-			for (i = 0; i < spans.length; i++) {
-				_field.setTextFormat(spans[i][0], spans[i][1], spans[i][2]);
-			}
-			
-		}
-		
 		/** Updates the text buffer, which is the source for the image buffer. */
 		public function updateTextBuffer():void
 		{
-			matchStyles();
-			//_field.setTextFormat(_form);
+			_field.setTextFormat(_form);
 			_field.width = _width;
 			_textWidth = _field.textWidth + 4;
 			_textHeight = _field.textHeight + 4;
@@ -321,23 +232,13 @@ package net.flashpunk.graphics
 		
 		/**
 		 * Alignment ("left", "center" or "right").
+		 * Only relevant if text spans multiple lines.
 		 */
 		public function get align():String { return _align; }
 		public function set align(value:String):void
 		{
 			if (_align == value) return;
 			_form.align = _align = value;
-			updateTextBuffer();
-		}
-		
-		/**
-		 * Leading (amount of vertical space between lines).
-		 */
-		public function get leading():Number { return _leading; }
-		public function set leading(value:Number):void
-		{
-			if (_leading == value) return;
-			_form.leading = _leading = value;
 			updateTextBuffer();
 		}
 		
@@ -405,7 +306,6 @@ package net.flashpunk.graphics
 		/** @private */ private var _font:String;
 		/** @private */ private var _size:uint;
 		/** @private */ private var _align:String;
-		/** @private */ private var _leading:Number;
 		/** @private */ private var _wordWrap:Boolean;
 		
 		// Default font family.
