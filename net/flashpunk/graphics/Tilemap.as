@@ -30,10 +30,10 @@
 		public function Tilemap(tileset:*, width:uint, height:uint, tileWidth:uint, tileHeight:uint) 
 		{
 			// set some tilemap information
-			_width = width - (width % tileWidth);
-			_height = height - (height % tileHeight);
-			_columns = _width / tileWidth;
-			_rows = _height / tileHeight;
+			_width = width;
+			_height = height;
+			_columns = Math.ceil(_width / tileWidth);
+			_rows = Math.ceil(_height / tileHeight);
 			_map = new BitmapData(_columns, _rows, false, 0);
 			_temp = _map.clone();
 			_tile = new Rectangle(0, 0, tileWidth, tileHeight);
@@ -47,8 +47,8 @@
 			if (tileset is Class) _set = FP.getBitmap(tileset);
 			else if (tileset is BitmapData) _set = tileset;
 			if (!_set) throw new Error("Invalid tileset graphic provided.");
-			_setColumns = uint(_set.width / tileWidth);
-			_setRows = uint(_set.height / tileHeight);
+			_setColumns = Math.ceil(_set.width / tileWidth);
+			_setRows = Math.ceil(_set.height / tileHeight);
 			_setCount = _setColumns * _setRows;
 		}
 		
@@ -331,7 +331,7 @@
 		}
 		
 		/**
-		 * Gets the index of a tile, based on its column and row in the tileset.
+		 * Gets the 1D index of a tile from a 2D index (its column and row in the tileset image).
 		 * @param	tilesColumn		Tileset column.
 		 * @param	tilesRow		Tileset row.
 		 * @return	Index of the tile.

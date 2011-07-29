@@ -20,7 +20,7 @@ package net.flashpunk.graphics
 		public var angle:Number = 0;
 		
 		/**
-		 * Scale of the image, effects both x and y scale.
+		 * Scale of the image, affects both x and y scale.
 		 */
 		public var scale:Number = 1;
 		
@@ -184,7 +184,7 @@ package net.flashpunk.graphics
 			}
 			if (!_source) return;
 			if (clearBefore) _buffer.fillRect(_bufferRect, 0);
-			_buffer.copyPixels(_source, _sourceRect, FP.zero);
+			_buffer.copyPixels(_source, _sourceRect, FP.zero, _drawMask, FP.zero);
 			if (_tint) _buffer.colorTransform(_bufferRect, _tint);
 		}
 		
@@ -257,24 +257,6 @@ package net.flashpunk.graphics
 				}
 			}
 			_tint = _colorTransform;
-			/*
-			if (_tintMode == TINTING_MULTIPLY) {
-				_tint.redMultiplier   = _tintFactor * (Number(_color >> 16 & 0xFF) / 255 - 1) + 1;
-				_tint.greenMultiplier = _tintFactor * (Number(_color >> 8 & 0xFF) / 255 - 1) + 1;
-				_tint.blueMultiplier  = _tintFactor * (Number(_color & 0xFF) / 255 - 1) + 1;
-				_tint.redOffset       = 0;
-				_tint.greenOffset     = 0;
-				_tint.blueOffset      = 0;
-			}
-			else {
-				_tint.redMultiplier   = 1.0 - _tintFactor;
-				_tint.greenMultiplier = 1.0 - _tintFactor;
-				_tint.blueMultiplier  = 1.0 - _tintFactor;
-				_tint.redOffset       = (_color >> 16 & 0xFF) * _tintFactor;
-				_tint.greenOffset     = (_color >> 8 & 0xFF) * _tintFactor;
-				_tint.blueOffset      = (_color & 0xFF) * _tintFactor;
-			}
-			*/
 			
 			_tint.redMultiplier   = _tintMode * (1.0 - _tintFactor) + (1-_tintMode) * (_tintFactor * (Number(_color >> 16 & 0xFF) / 255 - 1) + 1);
 			_tint.greenMultiplier = _tintMode * (1.0 - _tintFactor) + (1-_tintMode) * (_tintFactor * (Number(_color >> 8 & 0xFF) / 255 - 1) + 1);
@@ -319,6 +301,17 @@ package net.flashpunk.graphics
 			if (_class) _flips[_class] = _source;
 			
 			updateBuffer();
+		}
+		
+		/**
+		 * Set the transparency mask of the Image.
+		 */
+		public function get drawMask():BitmapData { return _drawMask; }
+		public function set drawMask(value:BitmapData):void
+		{
+			// no early exit because the BitmapData contents might have changed
+			_drawMask = value;
+			updateBuffer(true);
 		}
 		
 		/**
@@ -403,13 +396,14 @@ package net.flashpunk.graphics
 		/** @private */ protected var _bitmap:Bitmap = new Bitmap;
 		
 		// Color and alpha information.
-		/** @private */ private var _alpha:Number = 1;
-		/** @private */ private var _color:uint = 0x00FFFFFF;
-		/** @private */ private var _tintFactor:Number = 1.0;
-		/** @private */ private var _tintMode:Number = TINTING_MULTIPLY;
+		/** @protected */ protected var _alpha:Number = 1;
+		/** @protected */ protected var _color:uint = 0x00FFFFFF;
+		/** @protected */ protected var _tintFactor:Number = 1.0;
+		/** @protected */ protected var _tintMode:Number = TINTING_MULTIPLY;
 		/** @protected */ protected var _tint:ColorTransform;
-		/** @private */ private var _colorTransform:ColorTransform = new ColorTransform;
-		/** @private */ private var _matrix:Matrix = FP.matrix;
+		/** @protected */ protected var _colorTransform:ColorTransform = new ColorTransform;
+		/** @protected */ protected var _matrix:Matrix = FP.matrix;
+		/** @protected */ protected var _drawMask:BitmapData;
 		
 		// Flipped image information.
 		/** @protected */ protected var _class:String;

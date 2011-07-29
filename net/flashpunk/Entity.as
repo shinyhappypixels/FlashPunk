@@ -114,8 +114,8 @@ package net.flashpunk
 					_point.y = y;
 				}
 				else _point.x = _point.y = 0;
-				_camera.x = FP.camera.x;
-				_camera.y = FP.camera.y;
+				_camera.x = _world ? _world.camera.x : FP.camera.x;
+				_camera.y = _world ? _world.camera.y : FP.camera.y;
 				_graphic.render(renderTarget ? renderTarget : FP.buffer, _point, _camera);
 			}
 		}
@@ -194,7 +194,7 @@ package net.flashpunk
 			
 			if (types is String) {
 				return collide(String(types), x, y);
-			} else if (types is Array || types is Vector.<Entity>) {
+			} else if (types is Array || types is Vector.<String>) {
 				for each (var type:String in types)
 				{
 					if ((e = collide(type, x, y))) return e;
@@ -378,7 +378,7 @@ package net.flashpunk
 		 */
 		public function get onCamera():Boolean
 		{
-			return collideRect(x, y, FP.camera.x, FP.camera.y, FP.width, FP.height);
+			return collideRect(x, y, _world.camera.x, _world.camera.y, FP.width, FP.height);
 		}
 		
 		/**
@@ -436,7 +436,7 @@ package net.flashpunk
 		public function set layer(value:int):void
 		{
 			if (_layer == value) return;
-			if (!_added)
+			if (!_world)
 			{
 				_layer = value;
 				return;
@@ -453,7 +453,7 @@ package net.flashpunk
 		public function set type(value:String):void
 		{
 			if (_type == value) return;
-			if (!_added)
+			if (!_world)
 			{
 				_type = value;
 				return;
@@ -753,7 +753,6 @@ package net.flashpunk
 		// Entity information.
 		/** @private */ internal var _class:Class;
 		/** @private */ internal var _world:World;
-		/** @private */ internal var _added:Boolean;
 		/** @private */ internal var _type:String = "";
 		/** @private */ internal var _name:String = "";
 		/** @private */ internal var _layer:int;
