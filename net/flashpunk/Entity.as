@@ -744,8 +744,10 @@ package net.flashpunk
 		public function get name():String { return _name; }
 		public function set name(value:String):void
 		{
+			if (_name == value) return;
+			if (_name && _world) _world.unregisterName(this);
 			_name = value;
-			if (_world) _world.registerName(this);
+			if (_name && _world) _world.registerName(this);
 		}
 		
 		public function getClass ():Class { return _class; }
@@ -753,8 +755,8 @@ package net.flashpunk
 		// Entity information.
 		/** @private */ internal var _class:Class;
 		/** @private */ internal var _world:World;
-		/** @private */ internal var _type:String = "";
-		/** @private */ internal var _name:String = "";
+		/** @private */ internal var _type:String;
+		/** @private */ internal var _name:String;
 		/** @private */ internal var _layer:int;
 		/** @private */ internal var _updatePrev:Entity;
 		/** @private */ internal var _updateNext:Entity;

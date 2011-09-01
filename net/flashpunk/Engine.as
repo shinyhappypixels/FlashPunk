@@ -56,14 +56,16 @@
 			FP.halfHeight = height/2;
 			FP.assignedFrameRate = frameRate;
 			FP.fixed = fixed;
+			FP.timeInFrames = fixed;
 			
 			// global game objects
 			FP.engine = this;
 			FP.screen = new Screen;
 			FP.bounds = new Rectangle(0, 0, width, height);
 			FP._world = new World;
+			Draw.resetTarget();
 			
-			// miscellanious startup stuff
+			// miscellaneous startup stuff
 			if (FP.randomSeed == 0) FP.randomizeSeed();
 			FP.entity = new Entity;
 			FP._time = getTimer();
@@ -88,7 +90,6 @@
 			if (FP.tweener.active && FP.tweener._tween) FP.tweener.updateTweens();
 			if (FP._world.active)
 			{
-				Tween.update();
 				if (FP._world._tween) FP._world.updateTweens();
 				FP._world.update();
 			}
@@ -246,12 +247,11 @@
 			if (_delta > _skip) _delta = _skip;
 			while (_delta >= _rate)
 			{
+				FP.elapsed = _rate * FP.rate * 0.001;
+				
 				// update timer
 				_updateTime = _time;
 				_delta -= _rate;
-				FP.elapsed = (_time - _prev) / 1000;
-				if (FP.elapsed > maxElapsed) FP.elapsed = maxElapsed;
-				FP.elapsed *= FP.rate;
 				_prev = _time;
 				
 				// update loop
