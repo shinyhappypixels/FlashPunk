@@ -3,12 +3,11 @@ package net.flashpunk
 	import flash.display.BitmapData;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.utils.Dictionary;
-	import flash.utils.getQualifiedClassName;
 	import flash.utils.getDefinitionByName;
-	import net.flashpunk.masks.*;
+	import flash.utils.getQualifiedClassName;
+
 	import net.flashpunk.graphics.*;
-	
+
 	/**
 	 * Main game Entity class updated by World.
 	 */
@@ -532,8 +531,8 @@ package net.flashpunk
 				if (o.hasOwnProperty("height")) height = o.height;
 				if (o.hasOwnProperty("originX") && !(o is Graphic)) originX = o.originX;
 				else if (o.hasOwnProperty("x")) originX = -o.x;
-				if (o.hasOwnProperty("originY") && !(o is Graphic)) originX = o.originY;
-				else if (o.hasOwnProperty("y")) originX = -o.y;
+				if (o.hasOwnProperty("originY") && !(o is Graphic)) originY = o.originY;
+				else if (o.hasOwnProperty("y")) originY = -o.y;
 			}
 		}
 		
@@ -573,7 +572,7 @@ package net.flashpunk
 		 * Calculates the distance from this Entity to the point.
 		 * @param	px				X position.
 		 * @param	py				Y position.
-		 * @param	useHitboxes		If hitboxes should be used to determine the distance. If not, the Entities' x/y positions are used.
+		 * @param	useHitbox		If hitboxes should be used to determine the distance. If not, the Entities' x/y positions are used.
 		 * @return	The distance.
 		 */
 		public function distanceToPoint(px:Number, py:Number, useHitbox:Boolean = false):Number
@@ -691,7 +690,11 @@ package net.flashpunk
 		{
 			_point.x = x - this.x;
 			_point.y = y - this.y;
-			_point.normalize(amount);
+			
+			if (_point.x*_point.x + _point.y*_point.y > amount*amount) {
+				_point.normalize(amount);
+			}
+			
 			moveBy(_point.x, _point.y, solidType, sweep);
 		}
 		

@@ -4,12 +4,10 @@
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
+
 	import net.flashpunk.FP;
 	import net.flashpunk.Graphic;
-	import net.flashpunk.utils.Input;
-	import net.flashpunk.utils.Key;
-	
+
 	/**
 	 * Particle emitter used for emitting and rendering particle sprites.
 	 * Good rendering performance with large amounts of particles.
@@ -54,14 +52,13 @@
 			// particle info
 			var e:Number = FP.timeInFrames ? 1 : FP.elapsed,
 				p:Particle = _particle,
-				n:Particle, t:Number;
+				n:Particle;
 			
 			// loop through the particles
 			while (p)
 			{
 				// update time scale
 				p._time += e;
-				t = p._time / p._duration;
 				
 				// remove on time-out
 				if (p._time >= p._duration)
@@ -113,7 +110,13 @@
 				td = (type._ease == null) ? t : type._ease(t);
 				_p.x = _point.x + p._x + p._moveX * td;
 				_p.y = _point.y + p._y + p._moveY * td;
-				p._moveY += p._gravity * td;
+				
+				// stops particles from moving when gravity is enabled
+				// and if emitter.active = false (for game pausing for example)
+				if (active)
+				{
+					p._moveY += p._gravity * td;
+				}
 				
 				// get frame
 				rect.x = rect.width * type._frames[uint(td * type._frameCount)];
@@ -124,7 +127,8 @@
 				if (type._buffer)
 				{
 					// get alpha
-					_tint.alphaMultiplier = type._alpha + type._alphaRange * ((type._alphaEase == null) ? t : type._alphaEase(t));
+					var alphaT:Number = (type._alphaEase == null) ? t : type._alphaEase(t);
+					_tint.alphaMultiplier = type._alpha + type._alphaRange * alphaT;
 					
 					// get color
 					td = (type._colorEase == null) ? t : type._colorEase(t);
@@ -254,7 +258,7 @@
 		 */
 		public function get particleCount():uint { return _particleCount; }
 		
-		// Particle infromation.
+		// Particle information.
 		/** @private */ private var _types:Object = { };
 		/** @private */ private var _particle:Particle;
 		/** @private */ private var _cache:Particle;
@@ -271,6 +275,5 @@
 		// Drawing information.
 		/** @private */ private var _p:Point = new Point;
 		/** @private */ private var _tint:ColorTransform = new ColorTransform;
-		/** @private */ private static const SIN:Number = Math.PI / 2;
 	}
 }

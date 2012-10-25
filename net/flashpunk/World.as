@@ -2,8 +2,7 @@
 {
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
-	import net.flashpunk.utils.Input;
-	
+
 	/**
 	 * Updated by Engine, main game container that holds all currently active Entities.
 	 * Useful for organization, eg. "Menu", "Level1", etc.
@@ -155,7 +154,7 @@
 		
 		/**
 		 * Adds multiple Entities to the world.
-		 * @param	...list		Several Entities (as arguments) or an Array/Vector of Entities.
+		 * @param	list		Several Entities (as arguments) or an Array/Vector of Entities.
 		 */
 		public function addList(...list):void
 		{
@@ -170,7 +169,7 @@
 		
 		/**
 		 * Removes multiple Entities from the world.
-		 * @param	...list		Several Entities (as arguments) or an Array/Vector of Entities.
+		 * @param	list		Several Entities (as arguments) or an Array/Vector of Entities.
 		 */
 		public function removeList(...list):void
 		{
@@ -247,7 +246,7 @@
 		}
 		
 		/**
-		 * Clears stored reycled Entities of the Class type.
+		 * Clears stored recycled Entities of the Class type.
 		 * @param	classType		The Class type to clear.
 		 */
 		public static function clearRecycled(classType:Class):void
@@ -1182,7 +1181,6 @@
 		/** @private */	private var _layerList:Array = [];
 		/** @private */	private var _layerCount:Array = [];
 		/** @private */	private var _layerSort:Boolean;
-		/** @private */	private var _tempArray:Array = [];
 		/** @private */	private var _classCount:Dictionary = new Dictionary;
 		/** @private */	internal var _typeFirst:Object = { };
 		/** @private */	private var _typeCount:Object = { };

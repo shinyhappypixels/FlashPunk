@@ -1,9 +1,9 @@
 ﻿package net.flashpunk.masks 
 {
-	import net.flashpunk.*;
-	import net.flashpunk.masks.Masklist;
 	import flash.display.Graphics;
-	
+
+	import net.flashpunk.*;
+
 	/**
 	 * A Mask that can contain multiple Masks of one or various types.
 	 */
@@ -11,7 +11,7 @@
 	{
 		/**
 		 * Constructor.
-		 * @param	...mask		Masks to add to the list.
+		 * @param	mask		Masks to add to the list.
 		 */
 		public function Masklist(...mask) 
 		{
@@ -38,7 +38,7 @@
 					if (a.collide(b)) return true;
 				}
 			}
-			return true;
+			return false;
 		}
 		
 		/**
@@ -131,8 +131,7 @@
 			super.assignTo(parent);
 		}
 		
-		/** @private Updates the parent's bounds for this mask. */
-		override protected function update():void 
+		override public function update():void 
 		{
 			// find bounds of the contained masks
 			var t:int, l:int, r:int, b:int, h:Hitbox, i:int = _count;

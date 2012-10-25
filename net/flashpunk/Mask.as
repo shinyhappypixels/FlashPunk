@@ -4,9 +4,9 @@
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
-	import net.flashpunk.masks.Hitbox;
+
 	import net.flashpunk.masks.Masklist;
-	
+
 	/**
 	 * Base class for Entity collision masks.
 	 */
@@ -66,8 +66,8 @@
 			if (!list && parent) update();
 		}
 		
-		/** @private Updates the parent's bounds for this mask. */
-		protected function update():void
+		/** @public Updates the parent's bounds for this mask. */
+		public function update():void
 		{
 			
 		}

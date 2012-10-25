@@ -1,15 +1,12 @@
 ﻿package net.flashpunk.graphics 
 {
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextLineMetrics;
+
 	import net.flashpunk.FP;
-	import net.flashpunk.Graphic;
-	
+
 	/**
 	 * Used for drawing text using embedded fonts.
 	 * 
@@ -269,8 +266,8 @@
 			}
 			
 			_field.width = _width;
-			_textWidth = _field.textWidth + 4;
-			_textHeight = _field.textHeight + 4;
+			_field.width = _textWidth = Math.ceil(_field.textWidth + 4);
+			_field.height = _textHeight = Math.ceil(_field.textHeight + 4);
 			
 			if (resizable && (_textWidth > _width || _textHeight > _height))
 			{

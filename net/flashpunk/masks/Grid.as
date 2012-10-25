@@ -95,7 +95,7 @@
 		 * @param	row			First row.
 		 * @param	width		Columns to fill.
 		 * @param	height		Rows to fill.
-		 * @param	fill		Value to fill.
+		 * @param	solid		If the tiles should be solid.
 		 */
 		public function setRect(column:uint = 0, row:uint = 0, width:int = 1, height:int = 1, solid:Boolean = true):void
 		{
@@ -370,6 +370,5 @@
 		/** @private */ private var _tile:Rectangle;
 		/** @private */ private var _rect:Rectangle = FP.rect;
 		/** @private */ private var _point:Point = FP.point;
-		/** @private */ private var _point2:Point = FP.point2;
 	}
 }

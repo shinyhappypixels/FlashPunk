@@ -1,14 +1,13 @@
 ﻿package net.flashpunk.graphics 
 {
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
+
 	import net.flashpunk.FP;
-	import net.flashpunk.Graphic;
-	
+
 	/**
 	 * Creates a pre-rotated Image strip to increase runtime performance for rotating graphics.
 	 */
@@ -101,6 +100,6 @@
 		/** @private */ private static var _rotated:Dictionary = new Dictionary;
 		/** @private */ private static var _size:Dictionary = new Dictionary;
 		/** @private */ private static const _MAX_WIDTH:uint = 4000;
-		/** @private */ private static const _MAX_HEIGHT:uint = 4000;
+
 	}
 }

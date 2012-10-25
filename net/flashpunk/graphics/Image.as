@@ -2,13 +2,13 @@ package net.flashpunk.graphics
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.Graphics;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+
 	import net.flashpunk.*;
-	
+
 	/**
 	 * Performance-optimized non-animated image. Can be drawn to the screen with transformations.
 	 */
@@ -284,12 +284,14 @@ package net.flashpunk.graphics
 				_source = _flip;
 				_flip = temp;
 				updateBuffer();
+				return;
 			}
 			if (_class && _flips[_class])
 			{
 				_source = _flips[_class];
 				_flip = temp;
 				updateBuffer();
+				return;
 			}
 			_source = new BitmapData(_source.width, _source.height, true, 0);
 			_flip = temp;

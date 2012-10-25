@@ -8,15 +8,14 @@
 	import flash.geom.Rectangle;
 	import flash.media.SoundMixer;
 	import flash.media.SoundTransform;
-	import flash.system.System;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-	
-	import net.flashpunk.*;
+
 	import net.flashpunk.debug.Console;
 	import net.flashpunk.tweens.misc.Alarm;
 	import net.flashpunk.tweens.misc.MultiVarTween;
-	
+
 	/**
 	 * Static catch-all class used to access global properties and functions.
 	 */
@@ -109,6 +108,22 @@
 		public static var focused:Boolean = true;
 		
 		/**
+		 * Resize the screen.
+		 * @param width		New width.
+		 * @param height	New height.
+		 */
+		public static function resize(width:int, height:int):void
+		{
+			FP.width = width;
+			FP.height = height;
+			FP.halfWidth = width/2;
+			FP.halfHeight = height/2;
+			FP.bounds.width = width;
+			FP.bounds.height = height;
+			FP.screen.resize();
+		}
+		
+		/**
 		 * The currently active World object. When you set this, the World is flagged
 		 * to switch, but won't actually do so until the end of the current frame.
 		 */
@@ -182,7 +197,7 @@
 		
 		/**
 		 * Randomly chooses and returns one of the provided values.
-		 * @param	...objs		The Objects you want to randomly choose from. Can be ints, Numbers, Points, etc.
+		 * @param	objs		The Objects you want to randomly choose from. Can be ints, Numbers, Points, etc.
 		 * @return	A randomly chosen one of the provided parameters.
 		 */
 		public static function choose(...objs):*
@@ -210,7 +225,13 @@
 		 */
 		public static function approach(value:Number, target:Number, amount:Number):Number
 		{
-			return value < target ? (target < value + amount ? target : value + amount) : (target > value - amount ? target : value - amount);
+			if (value < target - amount) {
+				return value + amount;
+			} else if (value > target + amount) {
+				return value - amount;
+			} else {
+				return target;
+			}
 		}
 		
 		/**
@@ -434,11 +455,15 @@
 		{
 			if (max > min)
 			{
-				value = value < max ? value : max;
-				return value > min ? value : min;
+				if (value < min) return min;
+				else if (value > max) return max;
+				else return value;
+			} else {
+				// Min/max swapped
+				if (value < max) return max;
+				else if (value > min) return min;
+				else return value;
 			}
-			value = value < min ? value : min;
-			return value > max ? value : max;
 		}
 		
 		/**
@@ -606,7 +631,6 @@
 				case 5: return int(v * 255) << 16 | int(p * 255) << 8 | int(q * 255);
 				default: return 0;
 			}
-			return 0;
 		}
 		
 		/**
@@ -646,8 +670,16 @@
 		 */
 		public static function getBitmap(source:Class):BitmapData
 		{
-			if (_bitmap[String(source)]) return _bitmap[String(source)];
-			return (_bitmap[String(source)] = (new source).bitmapData);
+			if (_bitmap[source]) return _bitmap[source];
+			return (_bitmap[source] = (new source).bitmapData);
+		}
+		
+		/**
+		 * Clears the cache of BitmapData objects used by the getBitmap method.
+		 */
+		public static function clearBitmapCache():void
+		{
+			_bitmap = new Dictionary();
 		}
 		
 		/**
@@ -673,7 +705,7 @@
 		
 		/**
 		 * Logs data to the console.
-		 * @param	...data		The data parameters to log, can be variables, objects, etc. Parameters will be separated by a space (" ").
+		 * @param	data		The data parameters to log, can be variables, objects, etc. Parameters will be separated by a space (" ").
 		 */
 		public static function log(...data):void
 		{
@@ -695,7 +727,7 @@
 		
 		/**
 		 * Adds properties to watch in the console's debug panel.
-		 * @param	...properties		The properties (strings) to watch.
+		 * @param	properties		The properties (strings) to watch.
 		 */
 		public static function watch(...properties):void
 		{
@@ -937,9 +969,9 @@
 		/** @private */ public static var _flashTime:uint;
 		
 		// Bitmap storage.
-		/** @private */ private static var _bitmap:Object = { };
+		/** @private */ private static var _bitmap:Dictionary = new Dictionary();
 		
-		// Pseudo-random number generation (the seed is set in Engine's contructor).
+		// Pseudo-random number generation (the seed is set in Engine's constructor).
 		/** @private */ private static var _seed:uint = 0;
 		/** @private */ private static var _getSeed:uint;
 		

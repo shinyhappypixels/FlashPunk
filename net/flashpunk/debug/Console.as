@@ -5,19 +5,18 @@ package net.flashpunk.debug
 	import flash.display.BlendMode;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
-	import flash.display.Stage;
 	import flash.geom.ColorTransform;
 	import flash.geom.Rectangle;
+	import flash.system.System;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
-	import flash.system.System;
+
 	import net.flashpunk.Entity;
 	import net.flashpunk.FP;
-	import net.flashpunk.utils.Draw;
+	import net.flashpunk.graphics.Text;
 	import net.flashpunk.utils.Input;
 	import net.flashpunk.utils.Key;
-	import net.flashpunk.graphics.Text;
-	
+
 	/**
 	 * FlashPunk debug console; can use to log information or pause the game and view/move Entities and step the frame.
 	 */
@@ -38,7 +37,7 @@ package net.flashpunk.debug
 		
 		/**
 		 * Logs data to the console.
-		 * @param	...data		The data parameters to log, can be variables, objects, etc. Parameters will be separated by a space (" ").
+		 * @param	data		The data parameters to log, can be variables, objects, etc. Parameters will be separated by a space (" ").
 		 */
 		public function log(...data):void
 		{
@@ -65,7 +64,7 @@ package net.flashpunk.debug
 		
 		/**
 		 * Adds properties to watch in the console's debug panel.
-		 * @param	...properties		The properties (strings) to watch.
+		 * @param	properties		The properties (strings) to watch.
 		 */
 		public function watch(...properties):void
 		{
@@ -182,7 +181,8 @@ package net.flashpunk.debug
 			_logBar = new Rectangle(8, 24, 16, _logHeight - 8);
 			_logBarGlobal = _logBar.clone();
 			_logBarGlobal.y += 40;
-			_logLines = _logHeight / (big ? 16.5 : 8.5);
+			if (big) _logLines = _logHeight / 16.5;
+			else _logLines = _logHeight / 8.5;
 			
 			// The debug text.
 			_sprite.addChild(_debRead);
@@ -410,7 +410,7 @@ package net.flashpunk.debug
 			if (Input.mouseReleased) _dragging = false;
 		}
 		
-		/** @private Move the selected Entitites by the amount. */
+		/** @private Move the selected Entities by the amount. */
 		private function moveSelected(xDelta:int, yDelta:int):void
 		{
 			for each (var e:Entity in SELECT_LIST)
@@ -490,7 +490,7 @@ package net.flashpunk.debug
 			}
 		}
 		
-		/** @private Selects the Entitites in the rectangle. */
+		/** @private Selects the Entities in the rectangle. */
 		private function selectEntities(rect:Rectangle):void
 		{
 			if (rect.width < 0) rect.x -= (rect.width = -rect.width);
@@ -505,7 +505,7 @@ package net.flashpunk.debug
 				
 			if (Input.check(Key.CONTROL))
 			{
-				// Append selected Entitites with new selections.
+				// Append selected Entities with new selections.
 				for each (e in SCREEN_LIST)
 				{
 					if (SELECT_LIST.indexOf(e) < 0)
@@ -650,17 +650,23 @@ package net.flashpunk.debug
 				{
 					// Draw the log scrollbar handle.
 					_logRead.graphics.beginFill(0xFFFFFF, 1);
-					var h:uint = FP.clamp(_logBar.height * (_logLines / LOG.length), 12, _logBar.height - 4),
-						y:uint = _logBar.y + 2 + (_logBar.height - 16) * _logScroll;
+					var y:uint = _logBar.y + 2 + (_logBar.height - 16) * _logScroll;
 					_logRead.graphics.drawRoundRectComplex(_logBar.x + 2, y, 12, 12, 6, 6, 6, 6);
 				}
 				
 				// Display the log text lines.
 				if (LOG.length)
 				{
-					var i:int = LOG.length > _logLines ? Math.round((LOG.length - _logLines) * _logScroll) : 0,
-						n:int = i + Math.min(_logLines, LOG.length),
+					var i:int = 0,
+						n:int = 0,
 						s:String = "";
+					
+					if (LOG.length > _logLines) {
+						i = Math.round((LOG.length - _logLines) * _logScroll);
+					}
+					
+					n = i + Math.min(_logLines, LOG.length);
+						
 					while (i < n) s += LOG[i ++] + "\n";
 					_logReadText1.text = s;
 				}
@@ -859,8 +865,7 @@ package net.flashpunk.debug
 		/** @private */ private var _debRead:Sprite = new Sprite;
 		/** @private */ private var _debReadText0:TextField = new TextField;
 		/** @private */ private var _debReadText1:TextField = new TextField;
-		/** @private */ private var _debWidth:uint;
-		
+
 		// Button panel information
 		/** @private */ private var _butRead:Sprite = new Sprite;
 		/** @private */ private var _butDebug:Bitmap;

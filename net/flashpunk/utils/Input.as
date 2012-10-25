@@ -1,12 +1,11 @@
 ﻿package net.flashpunk.utils
 {
-	import flash.display.Stage;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
-	import flash.ui.Keyboard;
 	import flash.ui.Mouse;
+
 	import net.flashpunk.*;
-	
+
 	/**
 	 * Static class updated by Engine. Use for defining and checking keyboard/mouse input.
 	 */
@@ -101,7 +100,7 @@
 		/**
 		 * Defines a new input.
 		 * @param	name		String to map the input to.
-		 * @param	...keys		The keys to use for the Input.
+		 * @param	keys		The keys to use for the Input.
 		 */
 		public static function define(name:String, ...keys):void
 		{
@@ -152,7 +151,7 @@
 				}
 				return false;
 			}
-			return (input < 0) ? _pressNum : _press.indexOf(input) >= 0;
+			return (input < 0) ? Boolean(_pressNum): _press.indexOf(input) >= 0;
 		}
 		
 		/**
@@ -173,7 +172,7 @@
 				}
 				return false;
 			}
-			return (input < 0) ? _releaseNum : _release.indexOf(input) >= 0;
+			return (input < 0) ? Boolean(_releaseNum) : _release.indexOf(input) >= 0;
 		}
 		
 		/**
