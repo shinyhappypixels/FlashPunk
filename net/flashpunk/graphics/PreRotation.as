@@ -144,7 +144,7 @@ package net.flashpunk.graphics
 		/** @private */ private var _current:int = -1;
 		/** @private */ private var _sourceWidth:Number, _sourceHeight:Number;
 		/** @private */ private var _prevOriginX:Number = Number.POSITIVE_INFINITY, _prevOriginY:Number = Number.POSITIVE_INFINITY;
-		/** @private */ private var _frameOrigins:Vector.<Point> = new Vector.<Point>();
+		/** @private */ private var _frameOrigins:Vector.<Point> = null;
 		
 		// Global information.
 		/** @private */ private static var _rotated:Dictionary = new Dictionary;
